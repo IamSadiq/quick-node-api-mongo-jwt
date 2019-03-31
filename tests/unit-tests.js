@@ -12,7 +12,7 @@ describe('Status and content', function() {
 
         it('content', function(done){
             request('http://localhost:3000/', function(error, response, body) {
-                // expect(body).contains()
+                expect(body);
                 done();
             });
         });
@@ -20,15 +20,15 @@ describe('Status and content', function() {
 
     describe ('Users Route', function() {
         it('status', function(done){
-            request('http://localhost:3000/users', function(error, response, body) {
+            request('http://localhost:3000/api/users', function(error, response, body) {
                 expect(response.statusCode).to.equal(200);
                 done();
             });
         });
 
         it('content', function(done){
-            request('http://localhost:3000/users', function(error, response, body) {
-                expect(body).contains(Object);
+            request('http://localhost:3000/api/users', function(error, response, body) {
+                expect(body);
                 done();
             });
         });
