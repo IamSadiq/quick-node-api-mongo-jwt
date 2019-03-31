@@ -9,16 +9,14 @@ const config = require('../controllers/config');
 router.post('/', (req, res) => {
     req.body.password = bcrypt.hashSync(req.body.password, 8);
     UserModel.find({email: req.body.email}, (err, user) => {
-        if (err || user.length <= 0) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
+        if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
 
-        if(user) {
-            // create a token
-            var token = jwt.sign({ id: user._id }, config.secret, {
-                expiresIn: 600 // expires in 10 minutes
-            });
+        // create a token
+        var token = jwt.sign({ id: user._id }, config.secret, {
+            expiresIn: 86400 // expires in 24 hours
+        });
 
-            return res.json({status: 'success', token: token });
-        }
+        return res.json({status: 'success', token: token });
     });
 })
 

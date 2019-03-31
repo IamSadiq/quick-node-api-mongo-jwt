@@ -28,15 +28,16 @@ router.post('/', (req, res, next) => {
     mailer.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);
-            return res.status(500).send({status: 'failed', message: 'Failed to send email'});
+            return res.status(500).send({status: 'failed', message: 'User created but Failed to send email'});
         } else {
             console.log('Email sent: ' + info.response);
-            return res.status(200).json({status: 'success', message: 'User created and Verification email sent.', data: user});
+            return res.status(200).json({status: 'success', message: 'User created and Verification email has been sent', data: user});
         }
     });
     
   });
 });
+
 
 /* GET users listing. */
 router.get('/', token_verifier, (req, res, next) => {
@@ -89,7 +90,7 @@ router.delete('/:id', token_verifier, (req, res) => {
 
 
 // Upload (PUT) a user avatar listing
-router.put('/:id', token_verifier, (req, res) => {
+router.put('/upload', token_verifier, (req, res) => {
   User.findById(req.verifiedId, { password: 0 }, (err, user) => { // { password: 0 }projection
       if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
 

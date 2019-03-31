@@ -9,4 +9,4 @@ This is a quick node app I've put together for ease and speedy development, belo
 + TDD using Mocha, Chai and request
 + Mailing using nodemailer
 + Extra security using helmet
-+ Uploading using formidable
++ File upload using formidable
