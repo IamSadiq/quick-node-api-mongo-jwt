@@ -5,6 +5,9 @@ var mailer = require('../controllers/mailer');
 
 const User = require('../models/users');
 
+var formidable = require('formidable');
+var fs = require('fs');
+
 // POST users listing
 router.post('/', (req, res, next) => {
   req.body.verified = false;
@@ -25,7 +28,7 @@ router.post('/', (req, res, next) => {
     mailer.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);
-            return res.status(500).send({status: 'failed', message: 'Failed to create user'});
+            return res.status(500).send({status: 'failed', message: 'Failed to send email'});
         } else {
             console.log('Email sent: ' + info.response);
             return res.status(200).json({status: 'success', message: 'User created and Verification email sent.', data: user});
@@ -82,6 +85,32 @@ router.delete('/:id', token_verifier, (req, res) => {
             return res.status(200).send({status: 'success', user: user, message: 'users successfully removed.'});
         });
     });
+});
+
+
+// Upload (PUT) a user avatar listing
+router.put('/:id', token_verifier, (req, res) => {
+  User.findById(req.verifiedId, { password: 0 }, (err, user) => { // { password: 0 }projection
+      if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
+
+      var form = new formidable.IncomingForm();
+
+      form.parse(req, function (err, fields, files) {
+        var oldpath = files.filetoupload.path;
+        var newpath = '../public/images' + files.filetoupload.name;
+
+        fs.rename(oldpath, newpath, function (err) {
+          if (err) return res.status(500).send({status: 'failed', mesage: "There was a problem uploading the file."});
+
+          User.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
+              if (err) return res.status(500).send({status: 'failed', mesage: "There was a problem updating the user."});
+              return res.status(200).send({status: 'success', user: user, message: 'File uploaded and successfully moved.'});
+          });
+
+        });
+
+      });
+  });
 });
 
 module.exports = router;
