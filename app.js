@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/devhubs', { useNewUrlParser: true });
+mongoose.connect('mongodb://localhost/quicknodeapi', { useNewUrlParser: true });
 
 var AuthCtrl = require('./routes/auth');
 var indexRouter = require('./routes/index');

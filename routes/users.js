@@ -3,8 +3,13 @@ var router = express.Router();
 var token_verifier = require('../controllers/verify-token');
 var mailer = require('../controllers/mailer');
 
+const User = require('../models/users');
+
 // POST users listing
 router.post('/', (req, res, next) => {
+  req.body.verified = false;
+  req.body.createdAt = Date.now().toString();
+
   User.create(req.body, (err, user) => {
     if (err) return res.status(500).send({status: 'failed', message: 'failed to create user'});
 
@@ -20,10 +25,10 @@ router.post('/', (req, res, next) => {
     mailer.sendMail(mailOptions, function(error, info){
         if (error) {
             console.log(error);
-            res.status(500).send({status: 'failed', message: 'Failed to create user'});
+            return res.status(500).send({status: 'failed', message: 'Failed to create user'});
         } else {
             console.log('Email sent: ' + info.response);
-            res.status(200).json({status: 'success', message: 'User created and Verification email sent: ' + info.response});
+            return res.status(200).json({status: 'success', message: 'User created and Verification email sent.', data: user});
         }
     });
     
@@ -32,7 +37,7 @@ router.post('/', (req, res, next) => {
 
 /* GET users listing. */
 router.get('/', token_verifier, (req, res, next) => {
-  User.findById(req.userId, {password: 0}, (err, user) => {
+  User.findById(req.verifiedId, {password: 0}, (err, user) => {
       if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating user'});
 
       User.find({}, {password: 0}, (err, users) => {
@@ -45,7 +50,7 @@ router.get('/', token_verifier, (req, res, next) => {
 
 // GET a single user listing
 router.get('/:id', token_verifier, (req, res) => {
-    User.findById(req.userId, { password: 0 }, (err, user) => { // { password: 0 }projection
+    User.findById(req.verifiedId, { password: 0 }, (err, user) => { // { password: 0 }projection
         if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
 
         User.findById(req.params.id, (err, user) => {
@@ -57,7 +62,7 @@ router.get('/:id', token_verifier, (req, res) => {
 
 // Update (PUT) a single user listing
 router.put('/:id', token_verifier, (req, res) => {
-    User.findById(req.userId, { password: 0 }, (err, user) => { // { password: 0 }projection
+    User.findById(req.verifiedId, { password: 0 }, (err, user) => { // { password: 0 }projection
         if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
 
         User.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
@@ -69,7 +74,7 @@ router.put('/:id', token_verifier, (req, res) => {
 
 // DELETE a single user listing
 router.delete('/:id', token_verifier, (req, res) => {
-    User.findById(req.userId, { password: 0 }, (err, user) => { // { password: 0 } projection
+    User.findById(req.verifiedId, { password: 0 }, (err, user) => { // { password: 0 } projection
         if (err) return res.status(500).send({status: 'failed', message: 'there was a problem authenticating token'});
 
         User.findByIdAndRemove(req.params.id, (err, user) => {

@@ -11,7 +11,7 @@ function verifyToken(req, res, next) {
       if (err || !decoded) return res.json({status: 'failed', auth: false, message: 'Invalid token'});
 
       // if everything good, save to request for use in other routes
-      req.userId = decoded.id;
+      req.verifiedId = decoded.id;
       next();
     });
 }
